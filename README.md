@@ -127,6 +127,37 @@ glab issue list         # 看 Issue
 | 客户端 | https://gitlab.com/hym-company/hym-concerts |
 | 管理端 | https://gitlab.com/hym-company/hym-admin |
 
+### 线上地址
+
+| 项目 | 域名 |
+|------|------|
+| 客户端 | https://hym.webkubor.online |
+| 管理端 | https://hym-admin.webkubor.online |
+
+## 第六步：把本地项目推到公司群组
+
+如果你已经在本地写好了代码，想推到 `hym-company` 群组：
+
+```bash
+# 1. 进入你的项目目录
+cd 你的项目
+
+# 2. 初始化 git（如果还没有）
+git init
+
+# 3. 添加远程仓库
+git remote add origin https://gitlab.com/hym-company/你的项目名.git
+
+# 4. 提交所有代码
+git add -A
+git commit -m "feat: 初始化项目"
+
+# 5. 推送到 GitLab
+git push -u origin main
+```
+
+如果仓库还不存在，先去 https://gitlab.com/hym-company → New project 创建空项目，再执行上面步骤。
+
 ---
 
 > 不会就问，不要憋着。
