@@ -158,6 +158,38 @@ git push -u origin main
 
 如果仓库还不存在，先去 https://gitlab.com/hym-company → New project 创建空项目，再执行上面步骤。
 
+## 第七步：遇到 Bug 怎么提
+
+不要私聊说"出问题了"，去 GitLab 提 Issue，方便追踪：
+
+```bash
+# 用 CLI 快速创建 Issue
+glab issue create \
+  --title "fix: 登录页验证码收不到" \
+  --description "## 复现步骤
+1. 打开 hym-admin.webkubor.online
+2. 输入邮箱点发送验证码
+3. 等了 5 分钟没收到
+
+## 期望
+应该 30 秒内收到邮件
+
+## 截图
+（拖到输入框自动上传）"
+```
+
+或者去网页：
+- 客户端 Issue → https://gitlab.com/hym-company/hym-concerts/-/issues
+- 管理端 Issue → https://gitlab.com/hym-company/hym-admin/-/issues
+
+### Issue 标题规范
+
+| 前缀 | 用途 | 例子 |
+|------|------|------|
+| `fix:` | 报 Bug | `fix: 登录按钮点不了` |
+| `feat:` | 提需求 | `feat: 素材库加导出功能` |
+| `ask:` | 提问 | `ask: 怎么在本地跑起来` |
+
 ---
 
 > 不会就问，不要憋着。
