@@ -344,8 +344,8 @@ glab issue list         # 看 Issue
 | 用户名 | 角色 | 权限 |
 |--------|------|------|
 | `webkubor` | Owner | 管理群组、成员、仓库 |
-| `achun0511` | Developer | 推送代码、创建分支 |
-| `dayin` | Developer | 推送代码、创建分支 |
+| `achun0511` | Maintainer | 推送代码、管理分支 |
+| `dayin` | Maintainer | 推送代码、管理分支 |
 
 > ⚠️ 邮箱在 GitLab 上默认不公开。需要联系谁，在飞书群「栖洲的 AI 团队」里 @ 对方。
 

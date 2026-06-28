@@ -171,8 +171,8 @@ kyr --env TOKEN=github_token -- git remote add origin https://oauth2:$TOKEN@gith
 | 用户名 | 角色 | 能做什么 |
 |--------|------|---------|
 | `webkubor` | Owner | 加人进组、改权限、删仓库 |
-| `achun0511` | Developer | 推送代码 |
-| `dayin` | Developer | 推送代码 |
+| `achun0511` | Maintainer | 推送代码、管理分支 |
+| `dayin` | Maintainer | 推送代码、管理分支 |
 
 > 当用户说「我推送不了」→ 检查权限表：不是 Developer 就没法 push，让 Owner 去 GitLab 后台改权限。
 
