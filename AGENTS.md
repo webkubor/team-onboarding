@@ -5,33 +5,44 @@
 
 ---
 
-## 你的任务是什么
+## 第零步：安装密钥工具（必须先做）
 
-你是 HYM 团队的 AI 开发助手。你的核心任务：
+收到任何任务，第一件事是装 [Keyring](https://github.com/webkubor/agent-secret-skills)：
 
-1. 接收需求 → 写代码 → 验证 → 推送到 GitLab
-2. 写完代码不是你说了算，要推到 GitLab 让真人 Review
+```bash
+# 安装
+pip install keyring-cli
+
+# 初始化
+kyi
+
+# 验证
+ky --version
+```
+
+装完再往下走。Token 明文出现在代码里是红线。
 
 ---
 
 ## 前置自检（每次动手前跑一遍）
 
-收到任务后，先确认下面四项，缺一个就别往下走：
-
 ```bash
-# 1. GitLab Token 是否存在？
-#    从 secret://gitlab/personal-pat 读取，拿不到 → 停止，向用户要 Token
+# 1. Keyring 是否可用？
+ky --version || { echo "❌ Keyring 未安装 → pip install keyring-cli && kyi"; exit 1; }
 
-# 2. Git 是否可用？
+# 2. GitLab Token 是否已存入 Keyring？
+kya list gitlab 2>/dev/null | grep -q . || { echo "❌ 未找到 gitlab token → 引导用户执行 kyk set gitlab <token>"; exit 1; }
+
+# 3. Git 是否可用？
 git --version || { echo "❌ git 不可用"; exit 1; }
 
-# 3. glab 是否安装？
+# 4. glab 是否安装？
 glab version || { echo "❌ glab 未安装 → brew install glab"; exit 1; }
 
-# 4. glab 是否登录？如果没有，停止并要求用户配置
-glab auth status || { echo "❌ glab 未登录 → 需要引导用户执行 glab auth login"; exit 1; }
+# 5. glab 是否登录？
+glab auth status || { echo "❌ glab 未登录 → 引导用户执行 glab auth login"; exit 1; }
 
-# 5. 查账户信息和群组权限
+# 6. 查账户信息和群组权限
 echo "===== 账户 ====="
 glab api user 2>/dev/null | python3 -c "import sys,json; u=json.load(sys.stdin); print(f'{u.get(\"username\")} | {u.get(\"email\")}')"
 
@@ -50,13 +61,14 @@ else:
 
 | 检查项 | 通过标准 | 不通过怎么办 |
 |--------|---------|-------------|
-| Token | 能从 `secret://gitlab/personal-pat` 读到 | 向用户索要 Personal Access Token（权限：api + read_repository + write_repository） |
-| Git | `git --version` 正常输出 | 安装 Git |
-| glab | `glab version` 正常输出 | `brew install glab`（macOS）或 `winget install GitLab.GitLabCLI`（Windows） |
-| 登录 | `glab auth status` 输出 `✓` | 引导用户去 gitlab.com 创建 Token → 粘贴登录 |
-| 群组权限 | `glab api groups/hym-company` 返回 `access_level >= 30` | 联系管理员将用户加入 hym-company 群组并授予 Developer 权限 |
+| Keyring | `ky --version` 正常 | `pip install keyring-cli && kyi` |
+| Token | `kya list gitlab` 有内容 | 引导用户执行 `kyk set gitlab <token>`（权限：api + read_repository + write_repository） |
+| Git | `git --version` 正常 | 安装 Git |
+| glab | `glab version` 正常 | `brew install glab` |
+| 登录 | `glab auth status` 输出 `✓` | 引导用户去 gitlab.com 创建 Token → `glab auth login` |
+| 群组权限 | `glab api groups/hym-company` 返回 `access_level >= 30` | 联系管理员加进组并授予 Developer |
 
-五项全绿才继续，缺一项就停下来先把环境补齐。
+六项全绿才继续，缺一项就停下来先把环境补齐。
 
 ---
 
@@ -67,9 +79,8 @@ else:
 - GitLab 群组：`https://gitlab.com/hym-company`
 - 认证方式：Personal Access Token（**每人自己的**，不共享）
   - Token 跟人走：谁的 Agent 就用谁的 Token
-  - 从 `secret://gitlab/personal-pat` 读取（在自己的机器上配置）
+  - **Token 必须通过 Keyring 别名注入**，绝不硬编码在命令里
   - 权限：`api`, `read_repository`, `write_repository`
-- Git 远程地址格式：`https://oauth2:TOKEN@gitlab.com/hym-company/项目名.git`
 
 ### 标准推送流程
 
@@ -90,9 +101,11 @@ git checkout -b feat/功能描述
 git add -A
 git commit -m "feat: 简短描述"
 
-# 6. 推送到 GitLab
-git push origin feat/功能描述
+# 6. 推送到 GitLab（用 Keyring 别名，Token 不暴露）
+kyr --env GITLAB_TOKEN=gitlab_token -- git push origin feat/功能描述
 ```
+
+> ⚠️ 远程地址中的 Token 也用 Keyring：`kyr --env TOKEN=gitlab_token -- git remote set-url origin https://oauth2:$TOKEN@gitlab.com/hym-company/项目名.git`
 
 ### Commit 规范
 
@@ -146,29 +159,23 @@ git push origin feat/功能描述
 git clone https://github.com/用户/项目名.git
 cd 项目名
 
-# 2. 添加 GitLab 远程
-git remote set-url origin https://oauth2:TOKEN@gitlab.com/hym-company/项目名.git
-# 或新建 remote：
-git remote add gitlab https://oauth2:TOKEN@gitlab.com/hym-company/项目名.git
+# 2. 设置 GitLab 远程（Token 走 Keyring，不暴露）
+kyr --env TOKEN=gitlab_token -- git remote set-url origin https://oauth2:$TOKEN@gitlab.com/hym-company/项目名.git
 
 # 3. 推送
-git push -u origin main
+kyr --env GITLAB_TOKEN=gitlab_token -- git push -u origin main
 ```
 
 ### 纯本地项目上传
 
 ```bash
-# 1. 进入项目目录，确保已 git init
 cd ~/项目名
-git init  # 如果还没有
+git init
 
-# 2. 添加远程
-git remote add origin https://oauth2:TOKEN@gitlab.com/hym-company/项目名.git
-
-# 3. 提交并推送
+kyr --env TOKEN=gitlab_token -- git remote add origin https://oauth2:$TOKEN@gitlab.com/hym-company/项目名.git
 git add -A
 git commit -m "feat: 初始化项目"
-git push -u origin main
+kyr --env GITLAB_TOKEN=gitlab_token -- git push -u origin main
 ```
 
 > ⚠️ 如果 GitLab 上还没有这个仓库，先去 `https://gitlab.com/hym-company` → **New project** → 创建空项目，再推送。
@@ -177,14 +184,10 @@ git push -u origin main
 
 ## 工具箱（联动生态）
 
-写代码别裸奔，这些工具让你的 Agent 更安全、更省钱：
-
 | 工具 | 用途 | Agent 怎么用 |
 |------|------|-------------|
-| [Keyring](https://github.com/webkubor/agent-secret-skills) | 密钥管理 | `keyring run --env TOKEN=gitlab_token -- git push` — 别名注入，明文不暴露 |
+| [Keyring](https://github.com/webkubor/agent-secret-skills) | 密钥管理 | `kyr --env TOKEN=gitlab_token -- git push` — 别名注入，明文不暴露 |
 | [Smart Router](https://github.com/webkubor/smart-router-skills) | 省钱路由 | 简单任务（翻译/格式化/摘要）自动切免费模型，复杂任务才用付费主模型 |
-
-> ⚠️ **绝对不要把 Token 写死在代码注释里。** 用 Keyring 别名，或者从 `secret://` 路径读取。
 
 ---
 
@@ -196,13 +199,20 @@ git push -u origin main
 
 **解决**：
 1. 确认当前 Agent 用的是谁的 Token：`glab auth status` 看登录用户名
-2. 如果不是自己的账户 → 去 gitlab.com 创建自己的 Personal Access Token，重新 `glab auth login`
-3. 如果 `glab auth status` 没登录 → 看 README「第二步」创建 Token
+2. 如果不是自己的账户 → 去 gitlab.com 创建自己的 Personal Access Token → `kyk set gitlab <新的token>`
+3. 如果 Keyring 里没有 token → `kyk set gitlab <token>`
 
 ### Q: 提示 403 或 404？
 
 - 403 → Token 权限不够，创建时确保勾选 `api` + `read_repository` + `write_repository`
 - 404 → 仓库名写错，或者仓库还不存在（先去 GitLab 网页创建空仓库）
+
+### Q: `kyr` 命令找不到？
+
+```bash
+pip install keyring-cli
+kyi
+```
 
 ---
 

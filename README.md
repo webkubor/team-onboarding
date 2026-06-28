@@ -59,6 +59,13 @@ if node --version > /dev/null 2>&1; then
 else
   echo "⚠️  Node.js 未安装 → https://nodejs.org (LTS 版)"
 fi
+
+# 5. Keyring（密钥安全工具）
+if ky --version > /dev/null 2>&1; then
+  echo "✅ Keyring 已安装"
+else
+  echo "❌ Keyring 未安装 → pip install keyring-cli && kyi"
+fi
 ```
 
 根据输出结果，缺哪个补哪个：
@@ -69,6 +76,7 @@ fi
 | glab | 跳过 | 看第一步 ↓ |
 | 登录+权限 | 显示用户名和群组权限 | 看第二步 ↓ |
 | Node.js | 跳过 | [安装 Node.js LTS](https://nodejs.org) |
+| Keyring | 跳过 | `pip install keyring-cli && kyi` |
 
 ---
 
@@ -102,11 +110,15 @@ glab version
 5. ⚠️ **立刻复制 token**（关掉页面就看不到了）
 6. **告诉你的 Agent 把 token 存到** `secret://gitlab/personal-pat`
 
-### 2.2 登录
+### 2.2 登录 + 存入 Keyring
 
 ```bash
+# 登录 GitLab CLI
 glab auth login --hostname gitlab.com
 # 粘贴你刚才复制的 token
+
+# 告诉 Agent 把 token 存到 Keyring
+kyk set gitlab <你刚才复制的token>
 ```
 
 ### 2.3 验证
