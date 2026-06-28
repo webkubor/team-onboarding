@@ -1,0 +1,130 @@
+# AGENTS.md — AI Agent 操作手册
+
+> 🤖 如果你是 AI Agent（Claude / Codex / Hermes 等），读这个。
+> 👤 如果你是真人开发者，请回到 [README.md](./README.md)。
+
+---
+
+## 你的任务是什么
+
+你是 HYM 团队的 AI 开发助手。你的核心任务：
+
+1. 接收需求 → 写代码 → 验证 → 推送到 GitLab
+2. 写完代码不是你说了算，要推到 GitLab 让真人 Review
+
+---
+
+## 推送代码到 GitLab
+
+### 前置条件
+
+- GitLab 群组：`https://gitlab.com/hym-company`
+- 认证方式：Personal Access Token（从 `secret://gitlab/personal-pat` 获取）
+- Git 远程地址格式：`https://oauth2:TOKEN@gitlab.com/hym-company/项目名.git`
+  - Token 可以是 Personal Access Token（权限：`api`, `read_repository`, `write_repository`）
+
+### 标准推送流程
+
+```bash
+# 1. 进入项目目录
+cd ~/项目名
+
+# 2. 确保在 main 分支且最新
+git checkout main
+git pull origin main
+
+# 3. 开新分支（不要在 main 上直接改）
+git checkout -b feat/功能描述
+
+# 4. 写代码...
+
+# 5. 提交
+git add -A
+git commit -m "feat: 简短描述"
+
+# 6. 推送到 GitLab
+git push origin feat/功能描述
+```
+
+### Commit 规范
+
+| 前缀 | 含义 | 例子 |
+|------|------|------|
+| `feat:` | 新功能 | `feat: 添加出图页面` |
+| `fix:` | 修 bug | `fix: 登录按钮不响应` |
+| `docs:` | 文档 | `docs: 更新 README` |
+| `refactor:` | 重构 | `refactor: 客户端改为纯前端` |
+| `chore:` | 杂项 | `chore: 更新依赖` |
+
+---
+
+## 仓库列表
+
+| 项目 | GitLab 地址 | 本地路径 | 技术栈 |
+|------|------------|---------|--------|
+| 管理端 | `hym-company/hym-admin` | `~/hym-admin` | Vue 3 + Naive UI + CF Pages Functions |
+| 客户端 | `hym-company/hym-concerts` | `~/hym-concerts` | Vue 3 + Naive UI |
+
+---
+
+## 项目通用规则
+
+1. **改完必跑** `npm run build`，构建通过才推送
+2. **只改你该改的**，不跨项目串改，不加无关功能
+3. **真实数据**，禁止假数据/占位数据
+4. **环境变量**只写 `.env.example`，不提交真实密钥
+5. **部署**：GitLab push → CF Pages 自动部署
+
+---
+
+## 新人项目怎么上传到 GitLab
+
+如果本地有一个新项目要加入 `hym-company` 群组：
+
+### GitHub 项目迁移到 GitLab
+
+```bash
+# 1. 克隆 GitHub 仓库（保留完整历史）
+git clone https://github.com/用户/项目名.git
+cd 项目名
+
+# 2. 添加 GitLab 远程
+git remote set-url origin https://oauth2:TOKEN@gitlab.com/hym-company/项目名.git
+# 或新建 remote：
+git remote add gitlab https://oauth2:TOKEN@gitlab.com/hym-company/项目名.git
+
+# 3. 推送
+git push -u origin main
+```
+
+### 纯本地项目上传
+
+```bash
+# 1. 进入项目目录，确保已 git init
+cd ~/项目名
+git init  # 如果还没有
+
+# 2. 添加远程
+git remote add origin https://oauth2:TOKEN@gitlab.com/hym-company/项目名.git
+
+# 3. 提交并推送
+git add -A
+git commit -m "feat: 初始化项目"
+git push -u origin main
+```
+
+> ⚠️ 如果 GitLab 上还没有这个仓库，先去 `https://gitlab.com/hym-company` → **New project** → 创建空项目，再推送。
+
+---
+
+## 部署到哪里
+
+| 项目类型 | 平台 | 域名格式 |
+|---------|------|---------|
+| Vue 前端 | Cloudflare Pages | `项目名.webkubor.online` |
+| Worker API | Cloudflare Workers | `api.webkubor.online` |
+
+部署命令参考：
+```bash
+npx wrangler pages deploy dist --project-name 项目名 --branch main
+```

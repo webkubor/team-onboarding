@@ -1,6 +1,7 @@
 # 🚀 HYM 团队开发入门指南
 
-> 写给新手 — 从零学会用 GitLab + AI 做开发协作
+> 👤 **真人新手请看下面** — 从零学会用 GitLab + AI 做开发协作
+> 🤖 **AI Agent 请读 [AGENTS.md](./AGENTS.md)** — 如何推送代码到 GitLab
 
 ---
 
