@@ -7,7 +7,12 @@
 
 ## 第零步：自检（先跑这个，30 秒搞定）
 
+> 💻 **macOS**：打开「终端」  
+> 🪟 **Windows**：打开「Git Bash」（安装 Git 时自带，没有就去 https://git-scm.com 下载）
+
 打开终端，复制粘贴下面整段：
+
+> ⚠️ **Windows 注意**：下面的脚本在 Git Bash 里跑。如果报 `python3: command not found`，把脚本里的 `python3` 全部改成 `python`。
 
 ```bash
 echo "===== 检查环境 ====="
@@ -65,6 +70,7 @@ if ky --version > /dev/null 2>&1; then
   echo "✅ Keyring 已安装"
 else
   echo "❌ Keyring 未安装 → pip install keyring-cli && kyi"
+  echo "   Windows 如果找不到 pip: py -m pip install keyring-cli && kyi"
 fi
 ```
 

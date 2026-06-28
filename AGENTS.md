@@ -10,10 +10,13 @@
 收到任何任务，第一件事是装 [Keyring](https://github.com/webkubor/agent-secret-skills)：
 
 ```bash
-# 安装
+# macOS
 pip install keyring-cli
+kyi
 
-# 初始化
+# Windows（Git Bash）
+pip install keyring-cli
+# 如果 pip 找不到：py -m pip install keyring-cli
 kyi
 
 # 验证
@@ -61,10 +64,10 @@ else:
 
 | 检查项 | 通过标准 | 不通过怎么办 |
 |--------|---------|-------------|
-| Keyring | `ky --version` 正常 | `pip install keyring-cli && kyi` |
+| Keyring | `ky --version` 正常 | macOS: `pip install keyring-cli && kyi`<br>Windows: `pip install keyring-cli && kyi`（找不到 pip 用 `py -m pip install keyring-cli && kyi`） |
 | Token | `kya list gitlab` 有内容 | 引导用户执行 `kyk set gitlab <token>`（权限：api + read_repository + write_repository） |
-| Git | `git --version` 正常 | 安装 Git |
-| glab | `glab version` 正常 | `brew install glab` |
+| Git | `git --version` 正常 | [下载 Git](https://git-scm.com)（Windows 装完自带 Git Bash） |
+| glab | `glab version` 正常 | macOS: `brew install glab`<br>Windows: `winget install GitLab.GitLabCLI` |
 | 登录 | `glab auth status` 输出 `✓` | 引导用户去 gitlab.com 创建 Token → `glab auth login` |
 | 群组权限 | `glab api groups/hym-company` 返回 `access_level >= 30` | 联系管理员加进组并授予 Developer |
 
@@ -210,7 +213,13 @@ kyr --env GITLAB_TOKEN=gitlab_token -- git push -u origin main
 ### Q: `kyr` 命令找不到？
 
 ```bash
+# macOS
 pip install keyring-cli
+kyi
+
+# Windows（Git Bash）
+pip install keyring-cli
+# 如果 pip 找不到：py -m pip install keyring-cli
 kyi
 ```
 
