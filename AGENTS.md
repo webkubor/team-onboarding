@@ -1,7 +1,9 @@
 # AGENTS.md — AI Agent 操作手册
 
-> 🤖 如果你是 AI Agent（Claude / Codex / Hermes 等），读这个。
-> 👤 如果你是真人开发者，请回到 [README.md](./README.md)。
+> 🤖 你是 Agent，读这个。读完去底部看 [平台专项指引](#平台专项指引)，走你自己的路。
+> 👤 真人请回 [README.md](./README.md)。
+
+**支持的 Agent 标签**：`#hermes` `#openclaw` `#claude-code` `#codex`
 
 ---
 

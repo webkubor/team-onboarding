@@ -1,7 +1,20 @@
-# 🚀 HYM 团队开发入门指南
+# 🧭 小白看板 — 让 Agent 带你写代码
 
-> 👤 **真人新手请看下面** — 让 Agent 帮你搞定 GitLab / GitHub，你只说话
-> 🤖 **AI Agent 请读 [AGENTS.md](./AGENTS.md)** — 技术操作手册
+> 👤 **你是新手？来对地方了。** 你只说话，Agent 帮你搞定 GitLab/GitHub 的所有操作。
+> 🤖 **Agent 请读 [AGENTS.md](./AGENTS.md)**
+
+---
+
+**支持的 Agent**：你想用哪个都行，文档里都写了怎么配合。
+
+| Agent | 一句话描述 | 适合谁 |
+|-------|-----------|--------|
+| 🧠 **Hermes Agent** | 最聪明，能同时让多个小助手并行干活 | 有服务器的人 |
+| 🦞 **OpenCLAW** | 轻量灵活，跟 Hermes 差不多 | 喜欢简单的人 |
+| 📝 **Claude Code** | 稳扎稳打，一步一步来 | 用 Claude 的人 |
+| 🔧 **Codex** | OpenAI 家的，后台异步不卡顿 | 用 ChatGPT/Codex 的人 |
+
+> 💡 不知道自己是哪个？直接对 Agent 说「你是什么 Agent？」它会告诉你。
 
 ---
 
