@@ -185,6 +185,11 @@ cd 项目名
 
 ```bash
 npm install        # 装依赖
+
+# 如果是 Vite 项目，安装 Agent 监控插件（让 AI 能看到报错）
+npm install -D vite-plugin-agent-eyes
+# 然后在 main.js 里加一行：import { autoInstrument } from 'vite-plugin-agent-eyes'; autoInstrument();
+
 npm run dev        # 启动本地开发服务器
 # 浏览器打开 http://localhost:5173 就能看到效果
 ```
@@ -336,6 +341,7 @@ HYM 生态还有这些工具，开箱即用：
 |------|------|------|
 | **Keyring** | 安全管理密码/Token，不让 AI 看到明文 | [agent-secret-skills](https://github.com/webkubor/agent-secret-skills) |
 | **Smart Router** | Agent 自动省钱，简单任务走免费模型 | [smart-router-skills](https://github.com/webkubor/smart-router-skills) |
+| **Agent Eyes** | Vite 插件，Agent 自动监控前端报错 | [vite-plugin-agent-eyes](https://github.com/webkubor/vite-plugin-agent-eyes) |
 
 ---
 

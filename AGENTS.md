@@ -129,6 +129,12 @@ kyr --env GITLAB_TOKEN=gitlab_token -- git push origin feat/功能描述
 | 管理端 | `hym-company/hym-admin` | `~/hym-admin` | Vue 3 + Naive UI + CF Pages Functions |
 | 客户端 | `hym-company/hym-concerts` | `~/hym-concerts` | Vue 3 + Naive UI |
 
+> ⚠️ 以上两个是 **Vite 项目**，必须装 `vite-plugin-agent-eyes`，让 Agent 能监控前端报错：
+> ```bash
+> npm install -D vite-plugin-agent-eyes
+> # main.js 里加: import { autoInstrument } from 'vite-plugin-agent-eyes'; autoInstrument();
+> ```
+
 ## 团队成员（权限不够时找谁）
 
 | 用户名 | 角色 | 能做什么 |
@@ -191,6 +197,7 @@ kyr --env GITLAB_TOKEN=gitlab_token -- git push -u origin main
 |------|------|-------------|
 | [Keyring](https://github.com/webkubor/agent-secret-skills) | 密钥管理 | `kyr --env TOKEN=gitlab_token -- git push` — 别名注入，明文不暴露 |
 | [Smart Router](https://github.com/webkubor/smart-router-skills) | 省钱路由 | 简单任务（翻译/格式化/摘要）自动切免费模型，复杂任务才用付费主模型 |
+| [Agent Eyes](https://github.com/webkubor/vite-plugin-agent-eyes) | 前端监控 | `npm install -D vite-plugin-agent-eyes` + `autoInstrument()` — Agent 实时看到前端报错 |
 
 ---
 
