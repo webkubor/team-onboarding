@@ -234,6 +234,39 @@ kyr --env GITLAB_TOKEN=gitlab_token -- git push -u origin main
 
 ## 常见问题
 
+### Q: 推送 main 分支被拒绝（protected branch）
+
+**症状**：`git push` 返回 `You are not allowed to push code to protected branches` 或 GitLab 返回 403
+
+**根因**：GitLab 群组默认保护 `main` 分支，Developer 不能直接推。
+
+**Agent 你这么做**：
+1. 告诉用户（大白话）：「main 分支有保护锁，需要你去网页上解开，30 秒就好」
+2. 给用户这个链接（替换项目名）：`https://gitlab.com/hym-company/项目名/-/settings/repository`
+3. 指导用户：往下滑到 **Protected branches** → 点 main 旁边的 **Unprotect**
+4. 用户解完告诉你，你立即重试推送
+
+**备选方案**（用户不想解保护）：
+```bash
+# 推到非保护分支，然后让用户网页上建 MR 合入 main
+git push origin feat/功能描述
+```
+
+---
+
+### Q: 提示「没有群组权限」或 401 on groups API
+
+**症状**：`glab api groups/hym-company` 返回 401 或 404
+
+**根因**：用户账号不在 `hym-company` 群组里。
+
+**Agent 你这么做**：
+1. 告诉用户：「你的 GitLab 账号还没进 hym-company 群组」
+2. 指导用户：在飞书群「栖洲的 AI 团队」里 @ webkubor，说「加我进 hym-company，账号是 xxx」
+3. 等用户确认加入后，重新跑自检
+
+---
+
 ### Q: Agent 推送时报 Permission denied？
 
 **原因**：用了别人的 Token。Token 跟人绑定，不是群组共享的。
@@ -243,10 +276,12 @@ kyr --env GITLAB_TOKEN=gitlab_token -- git push -u origin main
 2. 如果不是自己的账户 → 去 gitlab.com 创建自己的 Personal Access Token → `kyk set gitlab <新的token>`
 3. 如果 Keyring 里没有 token → `kyk set gitlab <token>`
 
+---
+
 ### Q: 提示 403 或 404？
 
-- 403 → Token 权限不够，创建时确保勾选 `api` + `read_repository` + `write_repository`
-- 404 → 仓库名写错，或者仓库还不存在（先去 GitLab 网页创建空仓库）
+- **403** → Token 权限不够，创建时确保勾选 `api` + `read_repository` + `write_repository`；或者 main 分支被保护（见上方 Q1）
+- **404** → 仓库名写错，或者仓库还不存在（先去 GitLab 网页创建空仓库）
 
 ### Q: `kyr` 命令找不到？
 

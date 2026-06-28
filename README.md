@@ -393,6 +393,49 @@ glab issue create \
 
 ---
 
+## 🕳️ 常见踩坑（Agent 推不上去？看这里）
+
+Agent 推送失败时，它会告诉你原因。你只需要按下面说的点一下。
+
+### 坑 1：推 main 分支报权限错误
+
+> 🔒 **原因**：GitLab 群组默认保护 `main` 分支，只有 Maintainer 才能直接推。你是 Developer。
+
+**Agent 会跟你说**：「main 分支被保护了，需要你去网页上解一下」
+
+**你做**（30 秒）：
+```
+打开 https://gitlab.com/hym-company/你的项目名/-/settings/repository
+→ 往下滑到 Protected branches
+→ 点 main 旁边的 Unprotect
+→ 告诉 Agent「好了」
+```
+Agent 一秒推上去。
+
+### 坑 2：根本没进群组
+
+> 🚫 **原因**：你的 GitLab 账号不在 `hym-company` 群组里。
+
+**Agent 会说**：「你的账号没有群组权限」
+
+**你做**：在飞书群「栖洲的 AI 团队」里 @ webkubor，说「加我进 hym-company，账号是 xxx」
+
+### 坑 3：Token 过期或权限不够
+
+> 🔑 **原因**：Token 过期了，或者创建时漏勾了权限。
+
+**Agent 会说**：「Token 有问题，需要重新创建一个」
+
+**你做**：去 https://gitlab.com/-/user_settings/personal_access_tokens 重新生成一个，勾上 `api` + `read_repository` + `write_repository`，然后把新 token 发给 Agent。
+
+### 坑 4：本地分支和远程冲突
+
+> 🔀 **原因**：你本地改的和远程别人推的不一样。
+
+**Agent 会自动处理**——它会 stash 你的改动 → 拉最新 → 再合并。你不需要管。
+
+---
+
 ## 配套工具
 
 HYM 生态还有这些工具，开箱即用：
