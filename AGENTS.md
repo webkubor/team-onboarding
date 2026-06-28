@@ -117,6 +117,19 @@ git push -u origin main
 
 ---
 
+## 工具箱（联动生态）
+
+写代码别裸奔，这些工具让你的 Agent 更安全、更省钱：
+
+| 工具 | 用途 | Agent 怎么用 |
+|------|------|-------------|
+| [Keyring](https://github.com/webkubor/agent-secret-skills) | 密钥管理 | `keyring run --env TOKEN=gitlab_token -- git push` — 别名注入，明文不暴露 |
+| [Smart Router](https://github.com/webkubor/smart-router-skills) | 省钱路由 | 简单任务（翻译/格式化/摘要）自动切免费模型，复杂任务才用付费主模型 |
+
+> ⚠️ **绝对不要把 Token 写死在代码注释里。** 用 Keyring 别名，或者从 `secret://` 路径读取。
+
+---
+
 ## 部署到哪里
 
 | 项目类型 | 平台 | 域名格式 |

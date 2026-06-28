@@ -193,4 +193,15 @@ glab issue create \
 
 ---
 
+## 第八步：配套工具
+
+HYM 生态还有这些工具，开箱即用：
+
+| 工具 | 用途 | 地址 |
+|------|------|------|
+| **Keyring** | 安全管理密码/Token，不让 AI 看到明文 | [agent-secret-skills](https://github.com/webkubor/agent-secret-skills) |
+| **Smart Router** | Agent 自动省钱，简单任务走免费模型 | [smart-router-skills](https://github.com/webkubor/smart-router-skills) |
+
+---
+
 > 不会就问，不要憋着。
