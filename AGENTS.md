@@ -29,86 +29,94 @@ ky --version
 
 ## 前置自检（每次动手前跑一遍）
 
+收到任务后，先判断用户说的是 GitLab 还是 GitHub，然后只查对应的。两个都装了就都查。
+
 ```bash
 # 1. Keyring 是否可用？
 ky --version || { echo "❌ Keyring 未安装 → pip install keyring-cli && kyi"; exit 1; }
 
-# 2. GitLab Token 是否已存入 Keyring？
-kya list gitlab 2>/dev/null | grep -q . || { echo "❌ 未找到 gitlab token → 引导用户执行 kyk set gitlab <token>"; exit 1; }
-
-# 3. Git 是否可用？
+# 2. Git 是否可用？
 git --version || { echo "❌ git 不可用"; exit 1; }
 
-# 4. glab 是否安装？
-glab version || { echo "❌ glab 未安装 → brew install glab"; exit 1; }
+# 3. 平台 CLI（至少装一个）
+HAS_GLAB=false; HAS_GH=false
+glab version > /dev/null 2>&1 && HAS_GLAB=true
+gh --version > /dev/null 2>&1 && HAS_GH=true
+if ! $HAS_GLAB && ! $HAS_GH; then
+  echo "❌ glab 和 gh 都没装 → macOS: brew install glab gh / Windows: winget install GitLab.GitLabCLI GitHub.cli"
+  exit 1
+fi
 
-# 5. glab 是否登录？
-glab auth status || { echo "❌ glab 未登录 → 引导用户执行 glab auth login"; exit 1; }
-
-# 6. 查账户信息和群组权限
-echo "===== 账户 ====="
-glab api user 2>/dev/null | python3 -c "import sys,json; u=json.load(sys.stdin); print(f'{u.get(\"username\")} | {u.get(\"email\")}')"
-
-echo "===== 权限 ====="
-glab api groups/hym-company 2>/dev/null | python3 -c "
+# 4. GitLab 检查（如果装了）
+if $HAS_GLAB; then
+  echo "===== GitLab ====="
+  glab auth status > /dev/null 2>&1 || { echo "❌ glab 未登录"; exit 1; }
+  glab api user 2>/dev/null | python3 -c "import sys,json; u=json.load(sys.stdin); print(f'用户: {u.get(\"username\")} | {u.get(\"email\")}')"
+  glab api groups/hym-company 2>/dev/null | python3 -c "
 import sys,json
 g=json.load(sys.stdin)
-if g.get('access_level',0) >= 30:
-    print(f'✅ Developer → 可以推送代码')
-elif g.get('access_level',0) >= 20:
-    print(f'⚠️  Reporter → 只读，不能推送，需要升级到 Developer')
-else:
-    print(f'❌ 无权限 → 联系管理员加你进 hym-company 群组')
-"
+lv=g.get('access_level',0)
+print(f'权限: {lv} ({\"✅ Developer\" if lv>=30 else \"⚠️ 只读\" if lv>=20 else \"❌ 无权限\"})')"
+  kya list gitlab 2>/dev/null | grep -q . || echo "⚠️ Keyring 无 gitlab token → kyk set gitlab <token>"
+fi
+
+# 5. GitHub 检查（如果装了）
+if $HAS_GH; then
+  echo "===== GitHub ====="
+  gh auth status > /dev/null 2>&1 || { echo "❌ gh 未登录"; exit 1; }
+  gh api user 2>/dev/null | python3 -c "import sys,json; u=json.load(sys.stdin); print(f'用户: {u.get(\"login\")}')"
+  kya list github 2>/dev/null | grep -q . || echo "⚠️ Keyring 无 github token → kyk set github <token>"
+fi
 ```
 
 | 检查项 | 通过标准 | 不通过怎么办 |
 |--------|---------|-------------|
-| Keyring | `ky --version` 正常 | macOS: `pip install keyring-cli && kyi`<br>Windows: `pip install keyring-cli && kyi`（找不到 pip 用 `py -m pip install keyring-cli && kyi`） |
-| Token | `kya list gitlab` 有内容 | 引导用户执行 `kyk set gitlab <token>`（权限：api + read_repository + write_repository） |
-| Git | `git --version` 正常 | [下载 Git](https://git-scm.com)（Windows 装完自带 Git Bash） |
-| glab | `glab version` 正常 | macOS: `brew install glab`<br>Windows: `winget install GitLab.GitLabCLI` |
-| 登录 | `glab auth status` 输出 `✓` | 引导用户去 gitlab.com 创建 Token → `glab auth login` |
-| 群组权限 | `glab api groups/hym-company` 返回 `access_level >= 30` | 联系管理员加进组并授予 Developer |
-
-六项全绿才继续，缺一项就停下来先把环境补齐。
+| Keyring | `ky --version` 正常 | `pip install keyring-cli && kyi`（Windows: `py -m pip install keyring-cli && kyi`） |
+| Git | `git --version` 正常 | [下载 Git](https://git-scm.com) |
+| glab | `glab version` 正常 | macOS: `brew install glab` / Windows: `winget install GitLab.GitLabCLI` |
+| gh | `gh --version` 正常 | macOS: `brew install gh` / Windows: `winget install GitHub.cli` |
+| GitLab 登录+权限 | `glab auth status` ✓ + Developer 权限 | 引导用户去 gitlab.com 创建 Token → `glab auth login` |
+| GitHub 登录 | `gh auth status` ✓ | 引导用户去 github.com 创建 Token → `gh auth login --with-token` |
+| Keyring Token | `kya list gitlab` 或 `kya list github` 有内容 | `kyk set gitlab <token>` 或 `kyk set github <token>` |
 
 ---
 
-## 推送代码到 GitLab
+## 推送代码（GitLab / GitHub 通用）
 
 ### 前置条件
 
 - GitLab 群组：`https://gitlab.com/hym-company`
+- GitHub 组织：`https://github.com/webkubor`
 - 认证方式：Personal Access Token（**每人自己的**，不共享）
   - Token 跟人走：谁的 Agent 就用谁的 Token
-  - **Token 必须通过 Keyring 别名注入**，绝不硬编码在命令里
-  - 权限：`api`, `read_repository`, `write_repository`
+  - **Token 必须通过 Keyring 别名注入**，绝不硬编码
+  - GitLab 权限：`api`, `read_repository`, `write_repository`
+  - GitHub 权限：`repo`（全部）
 
 ### 标准推送流程
 
 ```bash
-# 1. 进入项目目录
 cd ~/项目名
+git checkout main && git pull origin main         # 拉最新
+git checkout -b feat/功能描述                      # 开分支
+git add -A && git commit -m "feat: 简短描述"      # 提交
 
-# 2. 确保在 main 分支且最新
-git checkout main
-git pull origin main
-
-# 3. 开新分支（不要在 main 上直接改）
-git checkout -b feat/功能描述
-
-# 4. 写代码...
-
-# 5. 提交
-git add -A
-git commit -m "feat: 简短描述"
-
-# 6. 推送到 GitLab（用 Keyring 别名，Token 不暴露）
+# GitLab 推送（Keyring 别名注入）
 kyr --env GITLAB_TOKEN=gitlab_token -- git push origin feat/功能描述
+
+# GitHub 推送
+kyr --env GITHUB_TOKEN=github_token -- git push origin feat/功能描述
 ```
 
-> ⚠️ 远程地址中的 Token 也用 Keyring：`kyr --env TOKEN=gitlab_token -- git remote set-url origin https://oauth2:$TOKEN@gitlab.com/hym-company/项目名.git`
+### 设置远程地址（新项目）
+
+```bash
+# GitLab
+kyr --env TOKEN=gitlab_token -- git remote add origin https://oauth2:$TOKEN@gitlab.com/hym-company/项目名.git
+
+# GitHub
+kyr --env TOKEN=github_token -- git remote add origin https://oauth2:$TOKEN@github.com/webkubor/项目名.git
+```
 
 ### Commit 规范
 

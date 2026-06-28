@@ -1,7 +1,7 @@
 # 🚀 HYM 团队开发入门指南
 
-> 👤 **真人新手请看下面** — 从零学会用 GitLab + AI 做开发协作
-> 🤖 **AI Agent 请读 [AGENTS.md](./AGENTS.md)** — 如何推送代码到 GitLab
+> 👤 **真人新手请看下面** — 让 Agent 帮你搞定 GitLab / GitHub，你只说话
+> 🤖 **AI Agent 请读 [AGENTS.md](./AGENTS.md)** — 技术操作手册
 
 ---
 
@@ -26,12 +26,25 @@ fi
 
 # 2. GitLab CLI
 if glab version > /dev/null 2>&1; then
-  echo "✅ glab 已安装: $(glab version 2>&1 | head -1)"
+  echo "✅ glab（GitLab）已安装: $(glab version 2>&1 | head -1)"
 else
-  echo "❌ glab 未安装 → 看下面「第一步」"
+  echo "⚠️  glab 未安装 → 看下面「第一步」"
 fi
 
-# 3. 登录状态 & 账户信息
+# 3. GitHub CLI
+if gh --version > /dev/null 2>&1; then
+  echo "✅ gh（GitHub）已安装: $(gh --version 2>&1 | head -1)"
+  # 检查 GitHub 登录状态
+  if gh auth status > /dev/null 2>&1; then
+    echo "✅ gh 已登录: $(gh api user 2>/dev/null | python3 -c 'import sys,json;print(json.load(sys.stdin).get(\"login\",\"?\"))' 2>/dev/null || echo 'ok')"
+  else
+    echo "⚠️  gh 未登录 → 对 Agent 说「帮我登录 GitHub」"
+  fi
+else
+  echo "⚠️  gh 未安装 → 看下面「第一步」"
+fi
+
+# 4. GitLab 登录状态 & 账户信息
 if glab auth status > /dev/null 2>&1; then
   echo "✅ glab 已登录"
   echo ""
@@ -58,14 +71,14 @@ else
   echo "❌ glab 未登录 → 看下面「第二步」"
 fi
 
-# 4. Node.js（前端项目需要）
+# 5. Node.js（前端项目需要）
 if node --version > /dev/null 2>&1; then
   echo "✅ Node.js: $(node --version)"
 else
   echo "⚠️  Node.js 未安装 → https://nodejs.org (LTS 版)"
 fi
 
-# 5. Keyring（密钥安全工具）
+# 6. Keyring（密钥安全工具）
 if ky --version > /dev/null 2>&1; then
   echo "✅ Keyring 已安装"
 else
@@ -79,120 +92,154 @@ fi
 | 检查项 | ✅ 结果 | ❌ 结果 |
 |--------|---------|---------|
 | Git | 跳过 | [安装 Git](https://git-scm.com) |
-| glab | 跳过 | 看第一步 ↓ |
-| 登录+权限 | 显示用户名和群组权限 | 看第二步 ↓ |
+| glab（GitLab） | 跳过 | 看第一步 ↓ |
+| gh（GitHub） | 跳过 | 看第一步 ↓ |
+| GitLab 登录+权限 | 显示用户名和群组权限 | 看第二步 ↓ |
 | Node.js | 跳过 | [安装 Node.js LTS](https://nodejs.org) |
 | Keyring | 跳过 | `pip install keyring-cli && kyi` |
 
 ---
 
-## 第一步：安装 GitLab CLI
+## 第一步：安装 CLI 工具
 
-> 💡 第零步显示 `✅ glab` 就跳过这里。
+> 💡 第零步显示 `✅` 的跳过，安装缺的那个就行。
+
+**你只需要对 Agent 说**：「帮我安装 GitLab CLI 和 GitHub CLI」
+
+Agent 会自动执行以下操作。如果 Agent 不在身边，自己跑：
 
 ```bash
+# GitLab CLI
 # macOS
 brew install glab
-
-# Windows  
+# Windows
 winget install GitLab.GitLabCLI
+
+# GitHub CLI
+# macOS
+brew install gh
+# Windows
+winget install GitHub.cli
 
 # 验证
 glab version
+gh --version
 ```
 
 ---
 
-## 第二步：登录 GitLab
+## 第二步：登录（GitLab + GitHub）
 
-> 💡 第零步显示 `✅ glab 已登录` 就跳过这里。
+> 💡 第零步显示 `✅ 已登录` 的跳过，只登没登的那个。
 
-### 2.1 申请 Token（每人自己申请，不共享）
+**你只需要对 Agent 说**：「帮我登录 GitLab」或「帮我登录 GitHub」
+
+Agent 会引导你完成下面的步骤。
+
+### GitLab
+
+#### 2.1 申请 Token（每人自己申请，不共享）
 
 1. 打开 https://gitlab.com/-/user_settings/personal_access_tokens
 2. Token name: `HYM-Dev`
 3. 勾选权限: `api`, `read_repository`, `write_repository`
 4. 点 Create personal access token
 5. ⚠️ **立刻复制 token**（关掉页面就看不到了）
-6. **告诉你的 Agent 把 token 存到** `secret://gitlab/personal-pat`
 
-### 2.2 登录 + 存入 Keyring
+#### 2.2 Agent 帮你存好
 
+对 Agent 说：「用这个 token 登录 GitLab：`glpat-xxxx`」
+
+Agent 会自动执行：
 ```bash
-# 登录 GitLab CLI
-glab auth login --hostname gitlab.com
-# 粘贴你刚才复制的 token
-
-# 告诉 Agent 把 token 存到 Keyring
-kyk set gitlab <你刚才复制的token>
+glab auth login --hostname gitlab.com    # Agent 帮你登
+kyk set gitlab <token>                   # Agent 帮你存 Keyring
 ```
 
-### 2.3 验证
+### GitHub
+
+#### 2.1 申请 Token
+
+1. 打开 https://github.com/settings/tokens → Generate new token (classic)
+2. Note: `HYM-Dev`
+3. 勾选: `repo`（全部）、`read:org`
+4. 点 Generate token → ⚠️ **立刻复制**
+
+#### 2.2 Agent 帮你存好
+
+对 Agent 说：「用这个 token 登录 GitHub：`ghp_xxxx`」
+
+Agent 会自动执行：
+```bash
+gh auth login --with-token              # Agent 帮你登
+kyk set github <token>                  # Agent 帮你存 Keyring
+```
+
+### 验证
 
 ```bash
-glab auth status
-# 输出类似: ✓ Logged in to gitlab.com as webkubor
+glab auth status   # GitLab: ✓ Logged in to gitlab.com as 你的用户名
+gh auth status     # GitHub: ✓ Logged in to github.com as 你的用户名
 ```
 
 不显示 `✓` 就是没登成功，重做 2.1。
 
 ---
 
-## 第三步：GitLab 项目管理入门
+## 第三步：项目管理（GitLab / GitHub 通用）
 
-学会这四件事，你就能自己管理任何项目了。**你和你的 Agent 都要会。**
+学会下面四件事，你就能管任何项目了。**你只需要说话，Agent 帮你干活。**
 
 ### 3.1 创建新项目
 
-```bash
-# 方式 A：命令行创建
-glab repo create 项目名 --group hym-company --visibility private
+**你对 Agent 说**：「帮我在 GitLab 创建一个叫 xxx 的项目」或「帮我在 GitHub 创建一个叫 xxx 的仓库」
 
-# 方式 B：网页创建
-# 打开 https://gitlab.com/hym-company → New project → Create blank project
-```
+Agent 会自动用命令行或网页帮你建。
+
+> 📎 GitLab 群组地址：https://gitlab.com/hym-company
+> 📎 GitHub 组织地址：https://github.com/webkubor
 
 ### 3.2 把本地代码推上去
 
-假设你电脑上已经有一个项目文件夹：
+**你对 Agent 说**：「帮我把这个项目推送到 GitLab」或「推到 GitHub」
 
+Agent 会自动执行（你不需要看懂）：
 ```bash
-cd ~/我的项目
+# GitLab
+git init && git remote add origin https://gitlab.com/hym-company/项目名.git
 
-# 初始化 git（如果还没有）
-git init
+# GitHub
+git init && git remote add origin https://github.com/webkubor/项目名.git
 
-# 关联 GitLab 远程仓库
-git remote add origin https://gitlab.com/hym-company/我的项目.git
-
-# 提交并推送
-git add -A
-git commit -m "feat: 初始化项目"
-git push -u origin main
+# 然后提交推送
+git add -A && git commit -m "feat: 初始化" && git push -u origin main
 ```
 
-> ⚠️ 如果 `origin` 已存在：`git remote set-url origin https://gitlab.com/hym-company/我的项目.git`
+> 💡 你只需要告诉 Agent 你的项目叫什么名字，剩下的 Agent 全包。
 
 ### 3.3 克隆已有项目
 
+**你对 Agent 说**：「帮我把 xxx 项目拉下来」
+
+Agent 会自动：
 ```bash
-# 语法：git clone https://gitlab.com/群组名/项目名.git
-git clone https://gitlab.com/hym-company/项目名.git
-cd 项目名
+git clone https://gitlab.com/hym-company/项目名.git   # GitLab
+# 或
+git clone https://github.com/webkubor/项目名.git       # GitHub
 ```
 
 ### 3.4 装依赖跑起来
 
+**你对 Agent 说**：「帮我装依赖并跑起来」
+
+Agent 会自动：
 ```bash
-npm install        # 装依赖
-
-# 如果是 Vite 项目，安装 Agent 监控插件（让 AI 能看到报错）
-npm install -D vite-plugin-agent-eyes
-# 然后在 main.js 里加一行：import { autoInstrument } from 'vite-plugin-agent-eyes'; autoInstrument();
-
-npm run dev        # 启动本地开发服务器
-# 浏览器打开 http://localhost:5173 就能看到效果
+npm install                                          # 装依赖
+npm install -D vite-plugin-agent-eyes                # Vite 项目必装：Agent 监控插件
+# main.js 加: import { autoInstrument } from 'vite-plugin-agent-eyes'; autoInstrument();
+npm run dev                                          # 启动
 ```
+浏览器自动打开 `http://localhost:5173`，你就能看到效果。
 
 ---
 
