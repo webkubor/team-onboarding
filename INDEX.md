@@ -23,7 +23,7 @@
 | 11 | 常见踩坑 | 推不上去？权限不够？看这里 | ✅ 已写在 README |
 | 12 | 配套工具 | Keyring / Agent Eyes 等生态 | ✅ 已写在 README |
 | 13 | Agent 配合手册 | Agent 怎么读 AGENTS.md 执行任务 | ✅ 已写 AGENTS.md |
-| 14 | 邮件能力 | 用 Agent Mail CLI 收发邮件 | 📝 待写 |
+| 14 | [邮件能力](./docs/mail.md) | 申请 Agent 邮箱 + 收发邮件教程 | ✅ 已写 |
 | 15 | 自动化部署 | 代码推上去自动上线 | 📝 待写 |
 
 ## 🧑‍💼 角色指南
@@ -49,7 +49,7 @@ xiaobai-kanban/
 
 ## 📝 待写清单
 
-- [ ] **邮件能力** — Agent Mail CLI 安装配置 + 使用教程
+- [x] **邮件能力** — Agent Mail CLI 安装配置 + 使用教程
 - [ ] **自动化部署** — CF Pages / Vercel / GitLab CI 配置
 - [ ] **多项目管理** — 团队协作、权限管理、分支策略
 - [ ] **Agent 进阶** — 子任务分发、并行执行、技能编写
